@@ -9,8 +9,8 @@ As a foundation we'll be using [the awesome raylib project](https://raylib.com),
 If you have a Mac, using homebrew you need to install the following:
 
 ```
-brew install llvm raylib cmake libtool
-echo 'export PATH="/opt/homebrew/opt/llvm/bin:$PATH"' >> ~/.bash_profile
+brew install llvm raylib cmake pkg-config
+echo 'export PATH="/opt/homebrew/opt/llvm/bin:$PATH"' >> ~/.zshrc
 exit
 ```
 
@@ -21,7 +21,7 @@ The project has a number of config files for Visual Studio Code, some extension 
 If you prefer to use another IDE or just build the project directly, you can do so by executing the following from the project's root directory:
 
 ```
-rm -f build && mkdir build && (cd build && cmake .. && make)
+rm -rf build && mkdir build && (cd build && cmake .. && make)
 ```
 
 You'll get everything built under the `build/` directory.
