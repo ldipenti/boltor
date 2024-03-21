@@ -27,6 +27,7 @@ set_property(
 add_library(
     ${PROJECT_NAME}
     src/boltor.c
+    src/ecs.c
 )
 
 target_include_directories(
