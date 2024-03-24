@@ -9,4 +9,4 @@ typedef struct
     void *data;
 } BTRGameData;
 
-int BTRGame(int width, int height, int fps, char *title, BTRGameData data);
+int BTRGame(int width, int height, int fps, char *title, BTRGameData g);

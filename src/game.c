@@ -1,17 +1,13 @@
 #include "boltor/boltor.h"
+#include "math.h"
 #include "raylib.h"
-
-typedef struct
-{
-    char *text;
-    int size;
-    Color color;
-} VisualComponent;
+#include "stdio.h"
+#include "stdlib.h"
 
 typedef struct
 {
     BTREntity entity;
-    VisualComponent visual;
+    TextComponent visual;
     BTR2DPositionComponent position;
     BTR2DMovementComponent speed;
 } CharacterEntity;
@@ -19,29 +15,26 @@ typedef struct
 typedef struct
 {
     BTREntity entity;
-    VisualComponent visual;
+    TextComponent visual;
     BTR2DPositionComponent position;
-} MovingBannerEntity;
+} TextEntity;
 
 typedef struct
 {
     CharacterEntity hero;
-    MovingBannerEntity banner;
+    TextEntity banner, fpscounter;
 } GameData;
 
-void gameloop(void *data)
+void refreshBanner(void *data)
 {
     const int minSize   = 20;
     const int maxSize   = 100;
     const int sizeStep  = 1;
     const int frameStep = 50;
 
-    static bool goingUp   = true;
-    static int frameCount = frameStep;
+    static bool goingUp = true;
 
-    GameData *gameData    = (GameData *) data;
-    CharacterEntity *c    = &gameData->hero;
-    MovingBannerEntity *b = &gameData->banner;
+    TextEntity *b = (TextEntity *) data;
 
     if (goingUp)
     {
@@ -56,6 +49,33 @@ void gameloop(void *data)
     {
         goingUp = !goingUp;
     }
+}
+
+void refreshFPSCounter(void *data)
+{
+    TextEntity *counter = (TextEntity *) data;
+    float dt            = GetFrameTime();
+    if (dt > 0)
+    {
+        if (counter->visual.text != NULL)
+        {
+            free(counter->visual.text);
+        }
+        char *fpscount = (char *) malloc(20 * sizeof(char));
+        sprintf(fpscount, "%d FPS", (int) floor(1.0 / dt));
+        counter->visual.text = fpscount;
+    }
+}
+
+void gameloop(void *data)
+{
+    GameData *gameData = (GameData *) data;
+    CharacterEntity *c = &gameData->hero;
+    TextEntity *b      = &gameData->banner;
+    TextEntity *fps    = &gameData->fpscounter;
+
+    const int frameStep   = 50;
+    static int frameCount = frameStep;
 
     frameCount = frameCount - 1;
     if (frameCount == 0)
@@ -65,11 +85,14 @@ void gameloop(void *data)
     }
 
     BTR2DPhysicsSystem(&c->position, &c->speed);
+    b->visual.refreshText(b);
+    fps->visual.refreshText(fps);
 
     // Rendering
     ClearBackground(RAYWHITE);
     DrawText(b->visual.text, b->position.x, b->position.y, b->visual.size, b->visual.color);
     DrawText(c->visual.text, c->position.x, 450 - c->visual.size - c->position.y, c->visual.size, c->visual.color);
+    DrawText(fps->visual.text, fps->position.x, fps->position.y, fps->visual.size, fps->visual.color);
 
     // Position reset
     if (c->position.x > 800)
@@ -84,26 +107,37 @@ int main(void)
     const int screenHeight = 450;
     const int targetFPS    = 60;
     CharacterEntity hero;
-    MovingBannerEntity banner;
+    TextEntity banner;
+    TextEntity fpscounter;
 
-    hero.entity.id    = 1;
-    hero.visual.text  = "@";
-    hero.visual.size  = 20;
-    hero.visual.color = RED;
-    hero.position.x   = 0;
-    hero.position.y   = 0;
-    hero.speed.dx     = 5;
-    hero.speed.dy     = 15;
+    hero.entity.id          = 1;
+    hero.visual.text        = "@";
+    hero.visual.size        = 20;
+    hero.visual.color       = RED;
+    hero.position.x         = 0;
+    hero.position.y         = 0;
+    hero.speed.dx           = 5;
+    hero.speed.dy           = 15;
+    hero.visual.refreshText = NULL;
 
-    banner.entity.id    = 2;
-    banner.visual.text  = "Boltor BEGINS!";
-    banner.visual.size  = 20;
-    banner.visual.color = LIGHTGRAY;
-    banner.position.x   = 190;
-    banner.position.y   = 200;
+    banner.entity.id          = 2;
+    banner.visual.text        = "Boltor BEGINS!";
+    banner.visual.size        = 20;
+    banner.visual.color       = LIGHTGRAY;
+    banner.position.x         = 190;
+    banner.position.y         = 200;
+    banner.visual.refreshText = &refreshBanner;
 
-    GameData data        = {hero, banner};
-    BTRGameData gamedata = {gameloop, (void *) &data};
+    fpscounter.entity.id          = 3;
+    fpscounter.visual.text        = NULL;
+    fpscounter.visual.color       = DARKGREEN;
+    fpscounter.visual.size        = 25;
+    fpscounter.position.x         = 5;
+    fpscounter.position.y         = 5;
+    fpscounter.visual.refreshText = &refreshFPSCounter;
+
+    GameData data        = {hero, banner, fpscounter};
+    BTRGameData gamedata = {gameloop, &data};
 
     return BTRGame(screenWidth, screenHeight, targetFPS, "Hello from Raylib!", gamedata);
 }
