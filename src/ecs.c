@@ -1,9 +1,10 @@
 #include "boltor/ecs.h"
 
-void TwoDPhysicsSystem(BTR2DPositionComponent *p, BTR2DMovementComponent *m)
+void BTR2DPhysicsSystem(BTR2DPositionComponent *p, BTR2DMovementComponent *m)
 {
-    int gravity = -1;
-    p->x        = p->x + m->dx;
+    const int gravity = -1;
+
+    p->x = p->x + m->dx;
 
     if (p->y + m->dy > 0)
     {

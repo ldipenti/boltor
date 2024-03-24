@@ -1,7 +1,7 @@
 #include "boltor/boltor.h"
 #include "raylib.h"
 
-int BoltorGame(int width, int height, int fps, char *title, void (*callback)(void *), void *c)
+int BTRGame(int width, int height, int fps, char *title, BTRGameData g)
 {
     InitWindow(width, height, title);
     SetTargetFPS(fps);
@@ -9,7 +9,7 @@ int BoltorGame(int width, int height, int fps, char *title, void (*callback)(voi
     while (!WindowShouldClose())
     {
         BeginDrawing();
-        callback(c);
+        g.gameLoop(g.data);
         EndDrawing();
     }
 

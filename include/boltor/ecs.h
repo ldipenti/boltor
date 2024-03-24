@@ -15,4 +15,4 @@ typedef struct
     int id;
 } BTREntity;
 
-void TwoDPhysicsSystem(BTR2DPositionComponent *p, BTR2DMovementComponent *m);
+void BTR2DPhysicsSystem(BTR2DPositionComponent *p, BTR2DMovementComponent *m);

@@ -3,37 +3,56 @@
 
 typedef struct
 {
+    char *text;
+    int size;
+    Color color;
+} VisualComponent;
+
+typedef struct
+{
     BTREntity entity;
+    VisualComponent visual;
     BTR2DPositionComponent position;
     BTR2DMovementComponent speed;
 } CharacterEntity;
 
-void gameLoop(void *data)
+typedef struct
+{
+    BTREntity entity;
+    VisualComponent visual;
+    BTR2DPositionComponent position;
+} MovingBannerEntity;
+
+typedef struct
+{
+    CharacterEntity hero;
+    MovingBannerEntity banner;
+} GameData;
+
+void gameloop(void *data)
 {
     const int minSize   = 20;
     const int maxSize   = 100;
     const int sizeStep  = 1;
     const int frameStep = 50;
 
-    static int fontSize   = minSize;
     static bool goingUp   = true;
     static int frameCount = frameStep;
 
-    CharacterEntity *c = (CharacterEntity *) data;
-
-    ClearBackground(RAYWHITE);
-    DrawText("Boltor BEGINS!", 190, 200, fontSize, LIGHTGRAY);
+    GameData *gameData    = (GameData *) data;
+    CharacterEntity *c    = &gameData->hero;
+    MovingBannerEntity *b = &gameData->banner;
 
     if (goingUp)
     {
-        fontSize = fontSize + sizeStep;
+        b->visual.size = b->visual.size + sizeStep;
     }
     else
     {
-        fontSize = fontSize - sizeStep;
+        b->visual.size = b->visual.size - sizeStep;
     }
 
-    if (fontSize == minSize || fontSize == maxSize)
+    if (b->visual.size == minSize || b->visual.size == maxSize)
     {
         goingUp = !goingUp;
     }
@@ -44,8 +63,15 @@ void gameLoop(void *data)
         frameCount  = frameStep;
         c->speed.dy = 15;
     }
-    TwoDPhysicsSystem(&c->position, &c->speed);
-    DrawText("@", c->position.x, 450 - minSize - c->position.y, minSize, RED);
+
+    BTR2DPhysicsSystem(&c->position, &c->speed);
+
+    // Rendering
+    ClearBackground(RAYWHITE);
+    DrawText(b->visual.text, b->position.x, b->position.y, b->visual.size, b->visual.color);
+    DrawText(c->visual.text, c->position.x, 450 - c->visual.size - c->position.y, c->visual.size, c->visual.color);
+
+    // Position reset
     if (c->position.x > 800)
     {
         c->position.x = 0;
@@ -58,12 +84,26 @@ int main(void)
     const int screenHeight = 450;
     const int targetFPS    = 60;
     CharacterEntity hero;
+    MovingBannerEntity banner;
 
-    hero.entity.id  = 1;
-    hero.position.x = 0;
-    hero.position.y = 0;
-    hero.speed.dx   = 5;
-    hero.speed.dy   = 15;
+    hero.entity.id    = 1;
+    hero.visual.text  = "@";
+    hero.visual.size  = 20;
+    hero.visual.color = RED;
+    hero.position.x   = 0;
+    hero.position.y   = 0;
+    hero.speed.dx     = 5;
+    hero.speed.dy     = 15;
 
-    return BoltorGame(screenWidth, screenHeight, targetFPS, "Hello from Raylib!", gameLoop, (void *) &hero);
+    banner.entity.id    = 2;
+    banner.visual.text  = "Boltor BEGINS!";
+    banner.visual.size  = 20;
+    banner.visual.color = LIGHTGRAY;
+    banner.position.x   = 190;
+    banner.position.y   = 200;
+
+    GameData data        = {hero, banner};
+    BTRGameData gamedata = {gameloop, (void *) &data};
+
+    return BTRGame(screenWidth, screenHeight, targetFPS, "Hello from Raylib!", gamedata);
 }
