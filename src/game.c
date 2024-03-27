@@ -109,7 +109,17 @@ void gameloop(void *data)
         c->speed.dy = 15;
     }
 
-    // Systems mutating data
+    // Player input handling
+    if (IsKeyDown(KEY_RIGHT))
+    {
+        c->speed.dx += 1;
+    }
+    else if (IsKeyDown(KEY_LEFT))
+    {
+        c->speed.dx -= 1;
+    };
+
+    // Systems mutating component data
     for (int i = 0; i < reg->nextID; i++)
     {
         BTR2DPositionComponent *pos = reg->positions[i];
@@ -130,9 +140,13 @@ void gameloop(void *data)
     DrawText(fps->visual.text, fps->position.x, fps->position.y, fps->visual.size, fps->visual.color);
 
     // Position reset
-    if (c->position.x > 800)
+    if (c->speed.dx > 0 && c->position.x > 800)
     {
         c->position.x = 0;
+    }
+    else if (c->speed.dx < 0 && c->position.x < 0)
+    {
+        c->position.x = 800;
     }
 }
 
