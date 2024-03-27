@@ -1,6 +1,6 @@
 #pragma once
 
-#include "raylib.h"
+#include <raylib.h>
 
 typedef struct
 {
@@ -18,11 +18,6 @@ typedef struct
     int size;
     Color color;
     void (*refreshText)(void *data);
-} TextComponent;
-
-typedef struct
-{
-    int id;
-} BTREntity;
+} BTRTextComponent;
 
 void BTR2DPhysicsSystem(BTR2DPositionComponent *p, BTR2DMovementComponent *m);

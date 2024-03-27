@@ -1,5 +1,5 @@
 #include "boltor/boltor.h"
-#include "raylib.h"
+#include <raylib.h>
 
 int BTRGame(int width, int height, int fps, char *title, BTRGameData g)
 {
